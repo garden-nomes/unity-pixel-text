@@ -2,6 +2,8 @@
 
 I've struggled one too many times to get bitmap fonts to work perfectly in Unity--working with TTFs is messy, ensuring that all the various sizes and scales line up perfectly can be a headache and it's the absolute WORST when the pixels don't line up right. This package streamlines things by reading a font from a spritesheet and rendering it using Unity's built-in UI system.
 
+![A pixel text component in the Unity scene view](https://raw.githubusercontent.com/garden-nomes/unity-pixel-text/main/Thumbnail.png)
+
 ## Usage
 
 ### Installation
