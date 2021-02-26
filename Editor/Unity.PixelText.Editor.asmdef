@@ -1,0 +1,6 @@
+{
+    "name": "Unity.PixelText.Editor",
+    "references": [
+        "Unity.PixelText"
+    ]
+}
