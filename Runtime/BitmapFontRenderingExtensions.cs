@@ -43,7 +43,7 @@ namespace Unity.PixelText
             else if (valign == VerticalAlign.Middle)
                 y = (pixelHeight + height) / 2 - font.gridHeight;
             else
-                y = pixelHeight - font.gridHeight;
+                y = height - font.gridHeight;
 
             var glyphs = new List<RenderedGlyph>();
 
