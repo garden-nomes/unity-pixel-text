@@ -1,41 +1,88 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Unity.PixelText
 {
     public static class BitmapFontRenderingExtensions
     {
-        public static void RenderText(
-            this BitmapFont font, Texture2D dest, string text, TextAlign align, VerticalAlign valign)
+        public struct RenderedGlyph
         {
-            var srcPixels = font.texture.GetPixels();
-            var dstPixels = new Color[dest.width * dest.height];
+            public RenderedGlyph(Rect uvRect, Rect destinationRect)
+            {
+                this.uvRect = uvRect;
+                this.destinationRect = destinationRect;
+            }
 
-            var lines = font.SplitIntoLines(text, dest.width);
+            public Rect uvRect;
+            public Rect destinationRect;
+        }
+
+        public static RenderedGlyph[] RenderText(
+            this BitmapFont font,
+            string text,
+            Rect bounds,
+            float scale,
+            TextAlign align,
+            VerticalAlign valign,
+            Color color)
+        {
+            if (font == null || !font.isValid)
+                return new RenderedGlyph[0];
+
+            var pixelWidth = Mathf.FloorToInt(bounds.width / scale);
+            var pixelHeight = Mathf.FloorToInt(bounds.height / scale);
+
+            var lines = font.SplitIntoLines(text, pixelWidth);
             int height = lines.Count * font.gridHeight + (lines.Count - 1) * font.lineSpacing;
 
             int y;
 
             if (valign == VerticalAlign.Top)
-                y = dest.height - font.gridHeight;
+                y = pixelHeight - font.gridHeight;
             else if (valign == VerticalAlign.Middle)
-                y = (dest.height + height) / 2 - font.gridHeight;
+                y = (pixelHeight + height) / 2 - font.gridHeight;
             else
-                y = height - font.gridHeight;
+                y = pixelHeight - font.gridHeight;
+
+            var glyphs = new List<RenderedGlyph>();
 
             foreach (var line in lines)
             {
                 int x;
 
                 if (align == TextAlign.Right)
-                    x = dest.width - font.GetWidth(line);
+                    x = pixelWidth - font.GetWidth(line);
                 else if (align == TextAlign.Center)
-                    x = (dest.width - font.GetWidth(line)) / 2;
+                    x = (pixelWidth - font.GetWidth(line)) / 2;
                 else
                     x = 0;
 
                 for (int i = 0; i < line.Length; i++)
                 {
-                    x += font.RenderCharacter(dest, srcPixels, dstPixels, line[i], x, y);
+                    if (line[i] == ' ' || !font.mappings.ContainsKey(line[i]))
+                    {
+                        x += font.spaceWidth;
+                    }
+                    else
+                    {
+                        var pixelRect = font.mappings[line[i]];
+
+                        var uvRect = new Rect(
+                            (float) pixelRect.xMin / font.texture.width,
+                            (float) pixelRect.yMin / font.texture.height,
+                            (float) pixelRect.width / font.texture.width,
+                            (float) pixelRect.height / font.texture.height);
+
+                        var position = bounds.min + new Vector2(x * scale, y * scale);
+                        var size = new Vector2(pixelRect.width * scale, pixelRect.height * scale);
+                        var destinationRect = new Rect(position, size);
+
+                        if (bounds.Contains(destinationRect.min) && bounds.Contains(destinationRect.max))
+                            glyphs.Add(new RenderedGlyph(uvRect, destinationRect));
+
+                        x += pixelRect.width;
+                    }
 
                     if (i != line.Length - 1 && line[i] != ' ' && line[i + 1] != ' ')
                         x += font.letterSpacing;
@@ -44,37 +91,7 @@ namespace Unity.PixelText
                 y -= font.gridHeight + font.lineSpacing;
             }
 
-            dest.SetPixels(dstPixels);
-            dest.Apply();
+            return glyphs.ToArray();
         }
-
-        private static int RenderCharacter(
-            this BitmapFont font, Texture2D dest, Color[] srcPixels, Color[] dstPixels, char c, int x, int y)
-        {
-            if (c == ' ' || !font.mappings.ContainsKey(c))
-                return font.spaceWidth;
-
-            var rect = font.mappings[c];
-
-            for (int y0 = 0; y0 < rect.height; y0++)
-            {
-                for (int x0 = 0; x0 < rect.width; x0++)
-                {
-                    if (x + x0 < 0 || x + x0 >= dest.width || y + y0 < 0 || y + y0 >= dest.height)
-                        continue;
-
-                    int srcIndex = (rect.yMin + y0) * font.texture.width + rect.xMin + x0;
-
-                    if (srcPixels[srcIndex].a > 0.2f)
-                    {
-                        int dstIndex = (y + y0) * dest.width + x + x0;
-                        dstPixels[dstIndex] = Color.white;
-                    }
-                }
-            }
-
-            return rect.width;
-        }
-
     }
 }

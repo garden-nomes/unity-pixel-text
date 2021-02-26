@@ -13,15 +13,8 @@ namespace Unity.PixelText
         [SerializeField, TextArea(3, 10)] string _text = "";
         [SerializeField] TextProperties _props = TextProperties.defaultProperties;
 
-        private Texture2D _texture;
-
-        protected override void Start()
-        {
-            Repaint();
-            base.Start();
-        }
-
-        public override Texture mainTexture => _texture;
+        public override Texture mainTexture =>
+            font.texture == null ? base.mainTexture : font.texture;
 
         public string text
         {
@@ -31,7 +24,7 @@ namespace Unity.PixelText
                 if (value == _text)
                     return;
                 _text = value;
-                Repaint();
+                SetVerticesDirty();
             }
         }
 
@@ -43,7 +36,7 @@ namespace Unity.PixelText
                 if (value == _props.font)
                     return;
                 _props.font = value;
-                Repaint();
+                SetVerticesDirty();
             }
         }
 
@@ -55,7 +48,7 @@ namespace Unity.PixelText
                 if (value == _props.scale)
                     return;
                 _props.scale = value;
-                Repaint();
+                SetVerticesDirty();
             }
         }
 
@@ -67,7 +60,7 @@ namespace Unity.PixelText
                 if (value == _props.horizontalAlign)
                     return;
                 _props.horizontalAlign = value;
-                Repaint();
+                SetVerticesDirty();
             }
         }
 
@@ -79,40 +72,55 @@ namespace Unity.PixelText
                 if (value == _props.verticalAlign)
                     return;
                 _props.verticalAlign = value;
-                Repaint();
+                SetVerticesDirty();
             }
         }
 
-        public override void Rebuild(CanvasUpdate update)
+        protected override void OnPopulateMesh(VertexHelper vh)
         {
-            if (update == CanvasUpdate.PreRender)
-                Repaint();
-
-            base.Rebuild(update);
-        }
-
-        private void Repaint()
-        {
-            if (_props.font == null)
+            if (font == null || !font.isValid)
                 return;
 
-            var width = Mathf.FloorToInt(rectTransform.rect.width * _props.scale);
-            var height = Mathf.FloorToInt(rectTransform.rect.height * _props.scale);
+            vh.Clear();
 
-            if (width == 0 || height == 0)
+            var glyphs = font.RenderText(
+                text, rectTransform.rect, scale, horizontalAlign, verticalAlign, color);
+
+            foreach (var glyph in glyphs)
             {
-                _texture = null;
-                return;
-            }
+                var uv = glyph.uvRect;
+                var dest = glyph.destinationRect;
 
-            if (_texture == null || _texture.width != width || _texture.height != height)
-            {
-                _texture = new Texture2D(width, height, _props.font.texture.format, false);
-                _texture.filterMode = FilterMode.Point;
-                canvasRenderer.SetTexture(_texture);
-            }
+                var bottomLeft = new UIVertex()
+                {
+                    position = new Vector3(dest.xMin, dest.yMin, 0f),
+                    uv0 = new Vector2(uv.xMin, uv.yMin),
+                    color = color
+                };
 
-            _props.font.RenderText(_texture, _text, _props.horizontalAlign, _props.verticalAlign);
+                var bottomRight = new UIVertex()
+                {
+                    position = new Vector3(dest.xMax, dest.yMin, 0f),
+                    uv0 = new Vector2(uv.xMax, uv.yMin),
+                    color = color
+                };
+
+                var topRight = new UIVertex()
+                {
+                    position = new Vector3(dest.xMax, dest.yMax, 0f),
+                    uv0 = new Vector2(uv.xMax, uv.yMax),
+                    color = color
+                };
+
+                var topLeft = new UIVertex()
+                {
+                    position = new Vector3(dest.xMin, dest.yMax, 0f),
+                    uv0 = new Vector2(uv.xMin, uv.yMax),
+                    color = color
+                };
+
+                vh.AddUIVertexQuad(new UIVertex[] { bottomLeft, topLeft, topRight, bottomRight });
+            }
         }
     }
 }

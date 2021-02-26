@@ -13,8 +13,6 @@ namespace Unity.PixelText
 
         private static int _previewScale = 2;
 
-        Texture2D _previewTexture;
-
         public override void OnInspectorGUI()
         {
 
@@ -56,32 +54,30 @@ namespace Unity.PixelText
         }
 
         public override bool HasPreviewGUI() => (target as BitmapFont).isValid;
-        public override void OnPreviewGUI(Rect r, GUIStyle background)
+        public override void OnPreviewGUI(Rect rect, GUIStyle background)
         {
             if (Event.current.type != EventType.Repaint)
                 return;
 
             var font = target as BitmapFont;
 
-            var textureWidth = Mathf.FloorToInt(r.width / _previewScale);
-            var textureHeight = Mathf.FloorToInt(r.height / _previewScale);
+            float padding = 4f;
+            rect.xMin += padding;
+            rect.yMin += padding;
+            rect.xMax -= padding;
+            rect.yMax -= padding;
 
-            if (textureWidth == 0 || textureHeight == 0)
-                return;
+            var glyphs = font.RenderText(
+                _previewText, rect, _previewScale, TextAlign.Left, VerticalAlign.Top, Color.white);
 
-            r.width = textureWidth * _previewScale;
-            r.height = textureHeight * _previewScale;
-
-            if (_previewTexture == null ||
-                _previewTexture.width != textureWidth ||
-                _previewTexture.height != textureHeight)
+            foreach (var glyph in glyphs)
             {
-                _previewTexture = new Texture2D(textureWidth, textureHeight, font.texture.format, false);
-                _previewTexture.filterMode = FilterMode.Point;
-                font.RenderText(_previewTexture, _previewText, TextAlign.Left, VerticalAlign.Top);
-            }
+                var uv = glyph.uvRect;
+                var dest = glyph.destinationRect;
+                dest.y = rect.y + rect.height - (dest.y - font.gridHeight);
 
-            GUI.DrawTexture(r, _previewTexture, ScaleMode.ScaleToFit, false);
+                GUI.DrawTextureWithTexCoords(dest, font.texture, uv);
+            }
         }
 
         private void UpdateTextureImportSettings(Texture2D texture)
