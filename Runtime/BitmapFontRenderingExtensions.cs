@@ -78,7 +78,7 @@ namespace Unity.PixelText
                         var size = new Vector2(pixelRect.width * scale, pixelRect.height * scale);
                         var destinationRect = new Rect(position, size);
 
-                        if (bounds.Contains(destinationRect.min) && bounds.Contains(destinationRect.max))
+                        if (bounds.Overlaps(destinationRect))
                             glyphs.Add(new RenderedGlyph(uvRect, destinationRect));
 
                         x += pixelRect.width;

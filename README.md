@@ -31,7 +31,7 @@ If you like, you can adjust some additional settings that control how the font i
 
 Add a pixel text component: Component -> UI -> Pixel Text
 
-It functions as a replacement for Unity's built-in text component, although lacking many features (such as rich text). Position and size it via rect transform. Text will, and vertical overflow will be clipped. Tweak the "scale" factor (which represents units per pixel) until the text lines up with your pixel grid. Make sure that the rect transform's bottom-left corner sits on the pixel grid so that everything lines up neatly.
+It functions as a replacement for Unity's built-in text component, although lacking many features (such as rich text). Position and size it via rect transform. Text wraps within the rect transform's width. Tweak the "scale" factor (which represents units per pixel) until the text lines up with your pixel grid. Make sure that the rect transform's bottom-left corner sits on the pixel grid so that everything lines up neatly.
 
 ## Included fonts
 
