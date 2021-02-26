@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Unity.PixelText
 {
 
-    [CreateAssetMenu(fileName = "New Pixel Font", menuName = "Text/Pixel Font")]
-    public class PixelFont : ScriptableObject
+    [CreateAssetMenu(fileName = "New Bitmap Font", menuName = "Pixel Text/Bitmap Font")]
+    public class BitmapFont : ScriptableObject
     {
         [Header("Font Sheet")]
         public Texture2D texture;

@@ -6,8 +6,8 @@ namespace Unity.PixelText
     [Serializable]
     public class TextProperties
     {
-        [SerializeField] PixelFont _font;
-        public PixelFont font
+        [SerializeField] BitmapFont _font;
+        public BitmapFont font
         {
             get => _font;
             set => _font = value;

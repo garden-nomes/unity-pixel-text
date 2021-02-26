@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace Unity.PixelText
 {
-    public static class PixelFontRenderingExtensions
+    public static class BitmapFontRenderingExtensions
     {
         public static void RenderText(
-            this PixelFont font, Texture2D dest, string text, TextAlign align, VerticalAlign valign)
+            this BitmapFont font, Texture2D dest, string text, TextAlign align, VerticalAlign valign)
         {
             var srcPixels = font.texture.GetPixels();
             var dstPixels = new Color[dest.width * dest.height];
@@ -49,7 +49,7 @@ namespace Unity.PixelText
         }
 
         private static int RenderCharacter(
-            this PixelFont font, Texture2D dest, Color[] srcPixels, Color[] dstPixels, char c, int x, int y)
+            this BitmapFont font, Texture2D dest, Color[] srcPixels, Color[] dstPixels, char c, int x, int y)
         {
             if (c == ' ' || !font.mappings.ContainsKey(c))
                 return font.spaceWidth;

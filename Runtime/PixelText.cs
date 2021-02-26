@@ -35,7 +35,7 @@ namespace Unity.PixelText
             }
         }
 
-        public PixelFont font
+        public BitmapFont font
         {
             get => _props.font;
             set

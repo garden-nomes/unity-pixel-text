@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Unity.PixelText
 {
-    [CustomEditor(typeof(PixelFont))]
-    public class PixelFontEditor : Editor
+    [CustomEditor(typeof(BitmapFont))]
+    public class BitmapFontEditor : Editor
     {
         private string _previewText =>
             "The wizard quickly jinxed the gnomes before they vaporized.\n\n" +
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\n" +
-            (target as PixelFont).ordering;
+            (target as BitmapFont).ordering;
 
         private static int _previewScale = 2;
 
@@ -20,7 +20,7 @@ namespace Unity.PixelText
 
             base.OnInspectorGUI();
 
-            var font = target as PixelFont;
+            var font = target as BitmapFont;
 
             if (font.texture != null && !font.texture.isReadable)
             {
@@ -55,13 +55,13 @@ namespace Unity.PixelText
             }
         }
 
-        public override bool HasPreviewGUI() => (target as PixelFont).isValid;
+        public override bool HasPreviewGUI() => (target as BitmapFont).isValid;
         public override void OnPreviewGUI(Rect r, GUIStyle background)
         {
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            var font = target as PixelFont;
+            var font = target as BitmapFont;
 
             var textureWidth = Mathf.FloorToInt(r.width / _previewScale);
             var textureHeight = Mathf.FloorToInt(r.height / _previewScale);
